@@ -29,7 +29,7 @@
 import copy
 import json
 from builtins import isinstance
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 import deprecation
 from requests_toolbelt import MultipartEncoder
@@ -634,7 +634,7 @@ class KeycloakAdmin:
         data_raw = self.connection.raw_delete(urls_patterns.URL_ADMIN_REALM.format(**params_path))
         return raise_error_from_response(data_raw, KeycloakDeleteError, expected_codes=[204])
 
-    def get_users(self, query=None):
+    def get_users(self, query=None) -> List[Dict[str, Any]]:
         """Get all users.
 
         Return a list of users, filtered according to query parameters
@@ -785,7 +785,7 @@ class KeycloakAdmin:
         data_raw = self.connection.raw_delete(urls_patterns.URL_ADMIN_IDP.format(**params_path))
         return raise_error_from_response(data_raw, KeycloakDeleteError, expected_codes=[204])
 
-    def create_user(self, payload, exist_ok=False):
+    def create_user(self, payload: Dict[str, Any], exist_ok: bool = False) -> str:
         """Create a new user.
 
         Username must be unique
@@ -835,7 +835,7 @@ class KeycloakAdmin:
         )
         return raise_error_from_response(data_raw, KeycloakGetError)
 
-    def get_user_id(self, username):
+    def get_user_id(self, username: str) -> Optional[str]:
         """Get internal keycloak user id from username.
 
         This is required for further actions against this user.
@@ -853,7 +853,7 @@ class KeycloakAdmin:
         users = self.get_users(query={"username": lower_user_name, "max": 1, "exact": True})
         return users[0]["id"] if len(users) == 1 else None
 
-    def get_user(self, user_id):
+    def get_user(self, user_id: str) -> Dict[str, Any]:
         """Get representation of the user.
 
         UserRepresentation
@@ -867,7 +867,9 @@ class KeycloakAdmin:
         data_raw = self.connection.raw_get(urls_patterns.URL_ADMIN_USER.format(**params_path))
         return raise_error_from_response(data_raw, KeycloakGetError)
 
-    def get_user_groups(self, user_id, query=None, brief_representation=True):
+    def get_user_groups(
+        self, user_id: str, query=None, brief_representation=True
+    ) -> List[Dict[str, Any]]:
         """Get user groups.
 
         Returns a list of groups of which the user is a member
@@ -896,7 +898,7 @@ class KeycloakAdmin:
 
         return self.__fetch_all(url, query)
 
-    def update_user(self, user_id, payload):
+    def update_user(self, user_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Update the user.
 
         :param user_id: User id
@@ -1317,7 +1319,7 @@ class KeycloakAdmin:
         data_raw = self.raw_get(urls_patterns.URL_ADMIN_GROUP_BY_PATH.format(**params_path))
         return raise_error_from_response(data_raw, KeycloakGetError)
 
-    def create_group(self, payload, parent=None, skip_exists=False):
+    def create_group(self, payload: Dict[str, Any], parent=None, skip_exists=False) -> str:
         """Create a group in the Realm.
 
         GroupRepresentation
@@ -1353,7 +1355,7 @@ class KeycloakAdmin:
         except KeyError:
             return
 
-    def update_group(self, group_id, payload):
+    def update_group(self, group_id: str, payload: Dict[str, Any]):
         """Update group, ignores subgroups.
 
         GroupRepresentation
@@ -1373,7 +1375,7 @@ class KeycloakAdmin:
         )
         return raise_error_from_response(data_raw, KeycloakPutError, expected_codes=[204])
 
-    def group_set_permissions(self, group_id, enabled=True):
+    def group_set_permissions(self, group_id: str, enabled=True):
         """Enable/Disable permissions for a group.
 
         Cannot delete group if disabled
@@ -1392,7 +1394,7 @@ class KeycloakAdmin:
         )
         return raise_error_from_response(data_raw, KeycloakPutError)
 
-    def group_user_add(self, user_id, group_id):
+    def group_user_add(self, user_id: str, group_id: str):
         """Add user to group (user_id and group_id).
 
         :param user_id:  id of user
@@ -1412,7 +1414,7 @@ class KeycloakAdmin:
         )
         return raise_error_from_response(data_raw, KeycloakPutError, expected_codes=[204])
 
-    def group_user_remove(self, user_id, group_id):
+    def group_user_remove(self, user_id: str, group_id: str):
         """Remove user from group (user_id and group_id).
 
         :param user_id:  id of user
